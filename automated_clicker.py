@@ -46,40 +46,44 @@ class Display:
             self.btn1t1 = tk.Button(self.tab1, text = self.btn1t1Text, command = self.start_logging)
             self.btn1t1.pack(side= TOP)
 
-            #text pane
-            self.framelist = []
-            self.timer = tk.StringVar()
-            self.ID = []
+            #empty variables
+            self.framelist = [] #all frame for buttons
+            self.timer = tk.StringVar() #timer for delay between clicks
+            self.ID = [] #ID number of each frame
             self.photo = [] #images container
-            self.MouseClicks = [] #text variable in pane - empty at start
-            self.panelA = None
-            self.buttonA()
-            self.viewingPanel()
-            self.photos=[]
+            self.MouseClicks = [] #MouseClick container
+            self.photos=[] #images container
+
+            self.panelA = None #empty panel in tab2
+            self.buttonA() #create auto click button
+            self.viewingPanel() #create panel
             self.root.mainloop()
-# Changed the method to be executed on button press to 'self.updatePanel()'.
+
+        # Auto click button GUI
         def buttonA(self):
-            # Creating a photoimage object to use image
-            im = pyautogui.screenshot(region=(50,50, 100, 100)) #screnshot at spot 50x50. Captures gif. but does not work in listener.
-            self.photo = ImageTk.PhotoImage(im)
-            self.firstPage = tk.Button(self.tab1, text="Print Text", bd=1, image = self.photo, anchor=tk.CENTER,  command=lambda: self.run_autoclicker())
+            ## Creating a photoimage object to use image
+            # im = pyautogui.screenshot(region=(50,50, 100, 100)) #screnshot at spot 50x50. Captures gif. but does not work in listener.
+            # self.photo = ImageTk.PhotoImage(im)
+            # self.firstPage = tk.Button(self.tab1, text="Run Auto Click", bd=1, image = self.photo, anchor=tk.CENTER,  command=lambda: self.run_autoclicker())
+
+            self.firstPage = tk.Button(self.tab1, text="Run Auto Click", bd=1, anchor=tk.CENTER,  command=lambda: self.run_autoclicker())
             self.firstPage.image = self.photo #image inst. attached to button.
             self.firstPage.place(x=0, y=0)
             self.firstPage.pack()
 
             self.photos = []
 
-        # Changed text string to be empty.
+        # Panel to see all mouse positions - in tab2
         def viewingPanel(self):
             self.panelA = tk.Label(self.tab2, bg='white', width=65, height=13, padx=3, pady=3, anchor=tk.CENTER, text="")
             self.panelA.place(x=100, y=0)
             self.panelA.pack(side= TOP)
 
-        # Added 'updatePanel' method which updates the label in every button press.
+        # 'updatePanel' method - updates the panel text with Mouse click positions
         def updatePanel(self):
             self.panelA.config(text=self.MouseClicks)
 
-#enter text to field - print, and remove text
+        #enter text to field - print, and remove text
         def returnHit(self,event):
             self.value = self.ent1t2.get();
             print(self.value)
@@ -90,18 +94,16 @@ class Display:
         def update_btn1t1_text(self):
             self.btn1t1.config(text=self.btn1t1Text)
 
-
+        #make icon - convert from bmp to gif for Tkinter to accept
         def create_icon(self,i):
             io.imsave('AAAAAAAAAA.gif', self.photos[i]) #self.photos -is bmp. tkinter accepts only gif, so save to gif
             im2 =tk.PhotoImage(file ='AAAAAAAAAA.gif') #then reopen with Tkinter
             os.remove('AAAAAAAAAA.gif') #remove gif
             return(im2)
 
-#generate buttons, which click at position
+        #generate GUI buttons, which click at mouse position
         def createGameURLs(self, frameid):
-            # self.IMGbutton = []
 
-            # # del self.ID[0]
             for i in range(len(self.photos)):
                 if len(self.framelist) < 1: #color first subframe
                     id = uuid.uuid1().int
@@ -120,9 +122,10 @@ class Display:
                 self.addDaughterFrame() #-1 is last frame
 
                 # create timer selector
-                timerOPTIONS = ["0.1 s","0.1 s","0.5 s"," 1 s"," 1.5 s"] #etc
-                self.timer.set(timerOPTIONS[-1]) # default value
-                self.timerDropDown = ttk.OptionMenu(self.framelist[frameid], self.timer, *timerOPTIONS)
+                timerOPTIONS = ["0.1 s","0.5 s"," 1 s"," 1.5 s"] #etc
+                self.timer.set(timerOPTIONS[2]) # default value
+                print(self.timer.get())
+                self.timerDropDown = ttk.OptionMenu(self.framelist[frameid], self.timer, self.timer.get(), *timerOPTIONS)
                 self.timerDropDown.pack( side=LEFT)
 
                 icon = self.create_icon(i)
@@ -135,15 +138,14 @@ class Display:
                 # self.editbutton = tk.Button(self.framelist[frameid], text="Edit", width=10, height=2)
                 # self.editbutton['command'] = lambda idx=self.ID[-1], binst=self.editbutton: self.editaction(idx)
                 # self.editbutton.pack( side=LEFT)
-                #
+
                 self.clearbutton = tk.Button(self.framelist[frameid], text="Clear", width=10, height=2)
                 self.clearbutton['command'] = lambda idx=self.ID[-1], binst=self.clearbutton: self.clearaction(idx)
                 self.clearbutton.pack( side=LEFT)
-
-
             print(self.ID)
             # self.run_autoclicker() #testing auto clicking
 
+        #create new child frame within main frame - where action buttons are placed
         def addDaughterFrame (self):
             if len(self.framelist) < 1: #color first subframe
                 self.framelist.append(tk.Frame(self.tab1,bg='red'))
@@ -152,7 +154,7 @@ class Display:
             # self.framelist[-1].place(anchor = "center", relx = 0.5, rely = 0.5, relwidth = 0.96, relheight = 0.96)
             self.framelist[-1].pack(side= TOP,fill=BOTH, expand=1)
 
-
+        #edit action button - not yet realised
         def editaction(self,idx):
             # self.photos = []
             # self.start_logging()
@@ -163,8 +165,8 @@ class Display:
             # self.createGameURLs(idx)
 
             pass
+        #clear action button - removes the whole with buttons
         def clearaction(self, idx):
-            # print(self.framelist)
             id = self.ID.index(idx)
             print('self ID', self.ID)
             print('id', id)
@@ -181,7 +183,7 @@ class Display:
 
             print('self ID after', self.ID)
 
-#each button is enabled to click the mouse at position - so you can test where it clicks.
+        #test where auto click button clicks.
         def open_this(self, myNum):
             # print(self.ID.index(myNum))
             id = self.ID.index(myNum)
@@ -191,6 +193,7 @@ class Display:
             time.sleep(0.1)
             pyautogui.moveTo(CurserPos) #return mouse
 
+        #'auto clicker' - run auto click through all buttons. ESC to stop if in loop
         def run_autoclicker(self):
             CurserPos = pyautogui.position()
             for i in range(len(self.MouseClicks)):
@@ -204,7 +207,7 @@ class Display:
                     sys.exit(0)
             pyautogui.moveTo(CurserPos) #return mouse
 
-# keyboard logger - quits logging if esc pressed
+        # keyboard logger - stops logging when  esc pressed
         def on_press(self,key):
             print(key)
             if key == keyboard.Key.esc:
@@ -212,7 +215,7 @@ class Display:
             else:
                     pass
 
-# mouse click capture - any mouse button
+        # mouse click capture - any mouse button is captured :(
         def on_click(self,*args):
             # MousePos = args[0]+10,args[1]
             MousePos = args[0],args[1]
@@ -221,11 +224,11 @@ class Display:
             im = ImageGrab.grab(bbox =(MousePos[0]-x,MousePos[1]-y, MousePos[0]+y,MousePos[1]+y)) #bbox Xmin, Ymmax, Xmax, Ymin
             self.photos.append(im)
 
-# mouse scroll capture - just scroll, not press. Press goes to mouse click
+        # mouse scroll capture - just scroll, not press. Press goes to mouse click
         def on_scroll(self,x, y, dx, dy):
             sys.stdout.write('Scrolled {0}'.format((x, y)))
 
-#logger starting - listen for clicks
+        #logger starting - listen for clicks
         def start_logging(self):
             print("Start logging")
             self.btn1t1Text = "press ESC to stop"
@@ -233,10 +236,11 @@ class Display:
             self.root.update() #to show text "ESC to stop"
 
             self.MouseClicks = [] #text variable in pane - empty at start
-            self.updatePanel()
-            self.click_logging()
-            self.createGameURLs(-1)
+            self.updatePanel() #clear panel
+            self.click_logging() #learn mouse clicks
+            self.createGameURLs(-1) #create GUI buttons
 
+        #Listen four mouse clicks (and keyboard to stop listener)
         def click_logging(self):
             with mouse.Listener(
                         on_click = self.on_click,
